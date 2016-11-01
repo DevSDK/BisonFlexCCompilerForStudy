@@ -124,10 +124,11 @@ typedef union YYSTYPE
 
 int ival;
 float fval;
+char * str;
 
 
 /* Line 2058 of yacc.c  */
-#line 131 "c_compiler.tab.h"
+#line 132 "c_compiler.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

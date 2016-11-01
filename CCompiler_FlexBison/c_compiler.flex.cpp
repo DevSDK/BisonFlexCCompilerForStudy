@@ -615,17 +615,16 @@ char *yytext_ptr;
 
 #define _CRT_SECURE_NO_WARNINGS
 #include "c_compiler.tab.h"
-#include "SyntaxAnalize.h"
-#include "SyntaxAnalize.h"
+#include "Types.h"
 #include <stdio.h>
 int line_no, syntax_err;
-extern A_ID * current_id;
+ A_ID * current_id;
 extern YYSTYPE yyval;
-char * makeString();
-int checkIdentifier();
+char * current_ideString(char *);
+int checkIdentifier(char *);
 
 
-#line 629 "c_compiler.flex.cpp"
+#line 628 "c_compiler.flex.cpp"
 
 #define INITIAL 0
 
@@ -804,9 +803,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 24 "c_compiler.l"
+#line 23 "c_compiler.l"
 
-#line 810 "c_compiler.flex.cpp"
+#line 809 "c_compiler.flex.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -910,293 +909,293 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 25 "c_compiler.l"
+#line 24 "c_compiler.l"
 { }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 26 "c_compiler.l"
+#line 25 "c_compiler.l"
 {line_no++;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 27 "c_compiler.l"
+#line 26 "c_compiler.l"
 {return (AUTO_SYM);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 28 "c_compiler.l"
+#line 27 "c_compiler.l"
 {return (BREAK_SYM);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 29 "c_compiler.l"
+#line 28 "c_compiler.l"
 {return (CASE_SYM);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 30 "c_compiler.l"
+#line 29 "c_compiler.l"
 {return(CONTINUE_SYM);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 31 "c_compiler.l"
+#line 30 "c_compiler.l"
 {return (DEFAULT_SYM);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 32 "c_compiler.l"
+#line 31 "c_compiler.l"
 {return (DO_SYM);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 33 "c_compiler.l"
+#line 32 "c_compiler.l"
 {return (ELSE_SYM);}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 34 "c_compiler.l"
+#line 33 "c_compiler.l"
 {return(ENUM_SYM);}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 35 "c_compiler.l"
+#line 34 "c_compiler.l"
 {return (FOR_SYM);}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 36 "c_compiler.l"
+#line 35 "c_compiler.l"
 {return(IF_SYM);}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 37 "c_compiler.l"
+#line 36 "c_compiler.l"
 {return (RETURN_SYM);}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 38 "c_compiler.l"
+#line 37 "c_compiler.l"
 {return (SIZEOF_SYM);}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 39 "c_compiler.l"
+#line 38 "c_compiler.l"
 {return (STATIC_SYM);}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 40 "c_compiler.l"
+#line 39 "c_compiler.l"
 {return (STRUCT_SYM);}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 41 "c_compiler.l"
+#line 40 "c_compiler.l"
 {return (SWITCH_SYM);}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 42 "c_compiler.l"
+#line 41 "c_compiler.l"
 {return (TYPEDEF_SYM);}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 43 "c_compiler.l"
+#line 42 "c_compiler.l"
 {return(UNION_SYM);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 44 "c_compiler.l"
+#line 43 "c_compiler.l"
 {return (WHILE_SYM);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 45 "c_compiler.l"
+#line 44 "c_compiler.l"
 {return PLUSPLUS;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 46 "c_compiler.l"
+#line 45 "c_compiler.l"
 {return MINUSMINUS;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 47 "c_compiler.l"
+#line 46 "c_compiler.l"
 {return ARROW;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 48 "c_compiler.l"
+#line 47 "c_compiler.l"
 {return LSS;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 49 "c_compiler.l"
+#line 48 "c_compiler.l"
 {return GTR;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 50 "c_compiler.l"
+#line 49 "c_compiler.l"
 {return LEQ;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 51 "c_compiler.l"
+#line 50 "c_compiler.l"
 {return GEQ;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 52 "c_compiler.l"
+#line 51 "c_compiler.l"
 {return EQL;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 53 "c_compiler.l"
+#line 52 "c_compiler.l"
 {return NEQ;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 54 "c_compiler.l"
+#line 53 "c_compiler.l"
 {return AMPAMP;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 55 "c_compiler.l"
+#line 54 "c_compiler.l"
 {return BARBAR;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 56 "c_compiler.l"
+#line 55 "c_compiler.l"
 {return DOTDOTDOT;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 57 "c_compiler.l"
+#line 56 "c_compiler.l"
 {return LP;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 58 "c_compiler.l"
+#line 57 "c_compiler.l"
 {return RP;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 59 "c_compiler.l"
+#line 58 "c_compiler.l"
 {return LB;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 60 "c_compiler.l"
+#line 59 "c_compiler.l"
 {return RB;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 61 "c_compiler.l"
+#line 60 "c_compiler.l"
 {return LR;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 62 "c_compiler.l"
+#line 61 "c_compiler.l"
 {return RR;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 63 "c_compiler.l"
+#line 62 "c_compiler.l"
 {return COLON;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 64 "c_compiler.l"
+#line 63 "c_compiler.l"
 {return PERIOD;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 65 "c_compiler.l"
+#line 64 "c_compiler.l"
 {return COMMA;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 66 "c_compiler.l"
+#line 65 "c_compiler.l"
 {return EXCL;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 67 "c_compiler.l"
+#line 66 "c_compiler.l"
 {return STAR;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 68 "c_compiler.l"
+#line 67 "c_compiler.l"
 {return SLASH;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 69 "c_compiler.l"
+#line 68 "c_compiler.l"
 {return PERCENT;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 70 "c_compiler.l"
+#line 69 "c_compiler.l"
 {return AMP;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 71 "c_compiler.l"
+#line 70 "c_compiler.l"
 {return SEMICOLON;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 72 "c_compiler.l"
+#line 71 "c_compiler.l"
 {return PLUS;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 73 "c_compiler.l"
+#line 72 "c_compiler.l"
 {return MINUS;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 74 "c_compiler.l"
-{return ASSIGN;}
+#line 73 "c_compiler.l"
+{return ASSIGN;} 
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 76 "c_compiler.l"
+#line 75 "c_compiler.l"
 {yylval.ival = atoi(yytext); return (INTEGER_CONSTANT);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 77 "c_compiler.l"
-{yylval = makeString(yytext); return(FLOAT_CONSTANT);}
+#line 76 "c_compiler.l"
+{yylval.str = makeString(yytext); return(FLOAT_CONSTANT);}
 	YY_BREAK
 case 53:
 /* rule 53 can match eol */
 YY_RULE_SETUP
-#line 78 "c_compiler.l"
+#line 77 "c_compiler.l"
 {return STRING_LITERAL;}
 	YY_BREAK
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 79 "c_compiler.l"
+#line 78 "c_compiler.l"
 { return CHARCTER_CONSTANT; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 80 "c_compiler.l"
+#line 79 "c_compiler.l"
 { }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 81 "c_compiler.l"
+#line 80 "c_compiler.l"
 {}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 83 "c_compiler.l"
+#line 82 "c_compiler.l"
 ECHO;
 	YY_BREAK
-#line 1200 "c_compiler.flex.cpp"
+#line 1199 "c_compiler.flex.cpp"
 			case YY_STATE_EOF(INITIAL):
 				yyterminate();
 
@@ -2176,7 +2175,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 82 "c_compiler.l"
+#line 81 "c_compiler.l"
 
 
 char * makeString(char * s)
@@ -2200,17 +2199,17 @@ int checkIdentifier(char * s)
 	}
 	if(id ==0)
 	{
-		yylval = makeString(s);
+		yylval.str = makeString(s);
 		return IDENTIFIER;
 	}
 	else if(id->kind == ID_TYPE)
 	{
-		yylval = id->name;
+		yylval.str = id->name;
 		return IDENTIFIER;
 	}
 	else
 	{
-		yylval = id->name;
+		yylval.str = id->name;
 		return IDENTIFIER;
 	}
 

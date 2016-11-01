@@ -9,14 +9,13 @@ ws {delim}+
 
 #define _CRT_SECURE_NO_WARNINGS
 #include "c_compiler.tab.h"
-#include "SyntaxAnalize.h"
 #include "Types.h"
 #include <stdio.h>
 int line_no, syntax_err;
-extern A_ID * current_id;
+A_ID * current_id;
 extern YYSTYPE yyval;
-char * makeString();
-int checkIdentifier();
+char * makeString(char *);
+int checkIdentifier(char *);
 
 
 %}
@@ -71,10 +70,10 @@ while {return (WHILE_SYM);}
 "\;" {return SEMICOLON;}
 "\+" {return PLUS;}
 "\-" {return MINUS;}
-"\=" {return ASSIGN;}
+"\=" {return ASSIGN;} 
 
 {digit}+ {yylval.ival = atoi(yytext); return (INTEGER_CONSTANT);}
-{digit}+\.{digit}+ {yylval = makeString(yytext); return(FLOAT_CONSTANT);}
+{digit}+\.{digit}+ {yylval.str = makeString(yytext); return(FLOAT_CONSTANT);}
 \"([^"\n]|\\["\n])*\" {return STRING_LITERAL;}
 \'([^'\n]|\\['\n])\' { return CHARCTER_CONSTANT; }
 "//"[^\n]* { }
@@ -102,17 +101,17 @@ int checkIdentifier(char * s)
 	}
 	if(id ==0)
 	{
-		yylval = makeString(s);
+		yylval.str = makeString(s);
 		return IDENTIFIER;
 	}
 	else if(id->kind == ID_TYPE)
 	{
-		yylval = id->name;
+		yylval.str = id->name;
 		return IDENTIFIER;
 	}
 	else
 	{
-		yylval = id->name;
+		yylval.str = id->name;
 		return IDENTIFIER;
 	}
 

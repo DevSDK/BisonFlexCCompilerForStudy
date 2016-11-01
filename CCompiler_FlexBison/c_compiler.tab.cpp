@@ -67,7 +67,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SyntaxAnalize.h"
+#include "Types.h"
 
 extern int yylex();
 extern int yyparse();
@@ -190,10 +190,11 @@ typedef union YYSTYPE
 
 int ival;
 float fval;
+char * str;
 
 
 /* Line 387 of yacc.c  */
-#line 197 "c_compiler.tab.cpp"
+#line 198 "c_compiler.tab.cpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -221,7 +222,7 @@ int yyparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 225 "c_compiler.tab.cpp"
+#line 226 "c_compiler.tab.cpp"
 
 #ifdef short
 # undef short
@@ -525,9 +526,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    44,    44,    45,    48,    49,    50,    51,    54,    55,
-      56,    57,    58,    59,    60,    61,    62,    63,    64,    65,
-      66,    67,    68,    71,    72,    73,    74,    75
+       0,    45,    45,    46,    49,    50,    51,    52,    55,    56,
+      57,    58,    59,    60,    61,    62,    63,    64,    65,    66,
+      67,    68,    69,    72,    73,    74,    75,    76
 };
 #endif
 
@@ -1460,145 +1461,145 @@ yyreduce:
     {
         case 5:
 /* Line 1792 of yacc.c  */
-#line 49 "c_compiler.y"
+#line 50 "c_compiler.y"
     { printf("\tResult: %f\n", (yyvsp[(1) - (2)].fval));}
     break;
 
   case 6:
 /* Line 1792 of yacc.c  */
-#line 50 "c_compiler.y"
+#line 51 "c_compiler.y"
     { printf("\tResult: %i\n", (yyvsp[(1) - (2)].ival)); }
     break;
 
   case 7:
 /* Line 1792 of yacc.c  */
-#line 51 "c_compiler.y"
+#line 52 "c_compiler.y"
     { printf("bye!\n"); exit(0); }
     break;
 
   case 8:
 /* Line 1792 of yacc.c  */
-#line 54 "c_compiler.y"
+#line 55 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (1)].fval); }
     break;
 
   case 9:
 /* Line 1792 of yacc.c  */
-#line 55 "c_compiler.y"
+#line 56 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].fval) + (yyvsp[(3) - (3)].fval); }
     break;
 
   case 10:
 /* Line 1792 of yacc.c  */
-#line 56 "c_compiler.y"
+#line 57 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].fval) - (yyvsp[(3) - (3)].fval); }
     break;
 
   case 11:
 /* Line 1792 of yacc.c  */
-#line 57 "c_compiler.y"
+#line 58 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].fval) * (yyvsp[(3) - (3)].fval); }
     break;
 
   case 12:
 /* Line 1792 of yacc.c  */
-#line 58 "c_compiler.y"
+#line 59 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].fval) / (yyvsp[(3) - (3)].fval); }
     break;
 
   case 13:
 /* Line 1792 of yacc.c  */
-#line 59 "c_compiler.y"
+#line 60 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(2) - (3)].fval);  }
     break;
 
   case 14:
 /* Line 1792 of yacc.c  */
-#line 60 "c_compiler.y"
+#line 61 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].ival) + (yyvsp[(3) - (3)].fval); }
     break;
 
   case 15:
 /* Line 1792 of yacc.c  */
-#line 61 "c_compiler.y"
+#line 62 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].ival) - (yyvsp[(3) - (3)].fval); }
     break;
 
   case 16:
 /* Line 1792 of yacc.c  */
-#line 62 "c_compiler.y"
+#line 63 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].ival) * (yyvsp[(3) - (3)].fval); }
     break;
 
   case 17:
 /* Line 1792 of yacc.c  */
-#line 63 "c_compiler.y"
+#line 64 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].ival) / (yyvsp[(3) - (3)].fval); }
     break;
 
   case 18:
 /* Line 1792 of yacc.c  */
-#line 64 "c_compiler.y"
+#line 65 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].fval) + (yyvsp[(3) - (3)].ival); }
     break;
 
   case 19:
 /* Line 1792 of yacc.c  */
-#line 65 "c_compiler.y"
+#line 66 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].fval) - (yyvsp[(3) - (3)].ival); }
     break;
 
   case 20:
 /* Line 1792 of yacc.c  */
-#line 66 "c_compiler.y"
+#line 67 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].fval) * (yyvsp[(3) - (3)].ival); }
     break;
 
   case 21:
 /* Line 1792 of yacc.c  */
-#line 67 "c_compiler.y"
+#line 68 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].fval) / (yyvsp[(3) - (3)].ival); }
     break;
 
   case 22:
 /* Line 1792 of yacc.c  */
-#line 68 "c_compiler.y"
+#line 69 "c_compiler.y"
     { (yyval.fval) = (yyvsp[(1) - (3)].ival) / (float)(yyvsp[(3) - (3)].ival); }
     break;
 
   case 23:
 /* Line 1792 of yacc.c  */
-#line 71 "c_compiler.y"
+#line 72 "c_compiler.y"
     { (yyval.ival) = (yyvsp[(1) - (1)].ival); }
     break;
 
   case 24:
 /* Line 1792 of yacc.c  */
-#line 72 "c_compiler.y"
+#line 73 "c_compiler.y"
     { (yyval.ival) = (yyvsp[(1) - (3)].ival) + (yyvsp[(3) - (3)].ival);}
     break;
 
   case 25:
 /* Line 1792 of yacc.c  */
-#line 73 "c_compiler.y"
+#line 74 "c_compiler.y"
     { (yyval.ival) = (yyvsp[(1) - (3)].ival) - (yyvsp[(3) - (3)].ival); }
     break;
 
   case 26:
 /* Line 1792 of yacc.c  */
-#line 74 "c_compiler.y"
+#line 75 "c_compiler.y"
     { (yyval.ival) = (yyvsp[(1) - (3)].ival) * (yyvsp[(3) - (3)].ival); }
     break;
 
   case 27:
 /* Line 1792 of yacc.c  */
-#line 75 "c_compiler.y"
+#line 76 "c_compiler.y"
     {(yyval.ival) = (yyvsp[(2) - (3)].ival);  }
     break;
 
 
 /* Line 1792 of yacc.c  */
-#line 1602 "c_compiler.tab.cpp"
+#line 1603 "c_compiler.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1830,7 +1831,7 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 78 "c_compiler.y"
+#line 79 "c_compiler.y"
 
 int main() {
 yyin = stdin;
