@@ -2,5 +2,5 @@
 
 My Compiler Study Project 
 
-Using BISON, FLEX  (Yacc, lex) in Windows
+In Windows operating System, this project use 'BISON' , 'FLEX  (Yacc, Lex)'
 
