@@ -25,7 +25,7 @@ char * str;
 
 %start program
 %token IDENTIFIER TYPE_IDENTIFIER FLOAT_CONSTANT INTEGER_CONSTANT
-	   CHARCTER_CONSTANT STRING_LITERAL PLUS MINUS PLUSPLUS
+	   CHARACTER_CONSTANT STRING_LITERAL PLUS MINUS PLUSPLUS
 	   MINUSMINUS BAR AMP BARBAR AMPAMP ARROW
 	   SEMICOLON LSS GTR LEQ REQ GEQ EQL NEQ DOTDOTDOT
 	   LP RP LB RB LR RR PERIOD COMMA EXCL STAR SLASH PERCENT ASSIGN
@@ -174,16 +174,207 @@ direct_declarator
 		parameter_type_list_opt RP
 
 		;
+parameter_type_list_opt
+		:
+		| parameter_type_list
+		;
+parameter_type_list
+		:parameter_list
+		| parameter_list COMMA DOTDOTDOT
+		
+		;
+parameter_list
+		: parameter_declaration
+
+		| parameter_list COMMA parameter_declaration
+
+		;
+parameter_declaration
+		: declaration_specifiers declarator
+		
+		| declaration_specifiers abstract_declarator_opt
+
+		;
+abstract_declarator_opt
+		:
+		| abstract_declarator
+		;
+abstract_declarator
+		: direct_abstract_declarator
+		| pointer
+		| pointer direct_abstract_declarator
+		;
+direct_abstract_declarator
+		| pointer
+		| pointer direct_abstract_declarator
+		;
+statement_list_opt
+		:
+		| statement_list
+		;
+statement_list
+		: statement
+		| statement_list statement
+		;
+statement
+		: labeled_statement
+		| expression_statemnt
+		| selection_statement
+		| iteration_statemnt
+		| jump_statement
+		;
+labeled_statement
+		: CASE_SYM contant_expression COLON statement
+		| DEFAULT_SYM COLON statement
+		;
+compound_statement
+		: LR
+		
+
+		;
+expression_statement
+		: SEMICOLON
+		| expression SEMICOLON
+		;
+selection_statement
+		: IF_SYM LP expression RP statement
+			{$$ = makeNode(N_STMT_IF, $3, NIL, $5);}
+		| IF_SYM LP expression RP statement ELSE_SYM statement
+			{$$ = makeNode(N_STMT_IF_ELSE, $3, NIL, $5);}
+		| SWITCH_SYM LP expression RP statement
+			{$$ = makeNode(N_STMT_SWITCH, $3, NIL, $5);}
+		;
+iteration_statemnt
+		: WHILE_SYM LP expression RP statement
+		| DO_SYM statement WHILE_SYM RP expression RP SEMICOLON
+		| FOR_SYM LP for_expression RP statement
+		;
+for_expression
+		: expression_opt SEMICOLON expression_opt SEMICOLON expression_opt
+
+		;
+expression_opt
+		:
+		| expression
+		;
+jump_statement
+		: RETURN_SYM expression_opt SEMICOLON
+		| CONTINUE_SYM SEMICOLON
+		| BREAK_SYM SEMICOLON
+		;
+arg_expression_list_opt
+		:
+		| arg_expression
+		;
+arg_expression
+		: assignment_expression
+		| arg_expression_list COMMA assignment_expression
+		;
+constant_expression_opt
+		: constant_expression
+		;
+constant_expression
+		: expression
+		;
+expression
+		: comma_expression
+		;
+comma_expression
+		: assignment_expression
+		;
+assignment_expression
+		: conditional_expression
+		| unary_expression ASSIGN assignment_expression
+		;
+conditional_expression
+		: logical_or_expression
+		;
+logical_or_expression
+		: local_and_expression
+		| logical_or_expression BARBAR logical_and_expression
+
+		;
+logical_and_expression
+		: bitwise_or_expression
+		| logical_and_expression AMPAMP bitwise_or_expression
+		;
+bitwise_or_expression
+		: bitwise_xor_expression
+		;
+bitwise_xor_expression
+		: bitwise_and_expression
+		;
+bitwise_and_expression
+		: equality_expression
+		;
+equality_expression
+		: relational_expression
+		| equality_expression EQL relational_expression
+		| equality_expression NEQ relational_expression
+		;
+relational_expression
+		: shift_expression
+		| relational_expression LSS shift_expression
+		| relational_expression GTR shift_expression
+		| relational_expression LEQ shift_expression
+		| relational_expression_GEQ shift_expression
+		;
+shift_expression
+		: additive_expression
+		;
+additive_expression
+		: multiplicative_expression
+		| additive_expression PLUS multiplicative_expression
+		|additive_expression  MINUS multiplicative_expression
+		;
+multiplicative_expression
+		:cast_expression
+		| multiplicative_expression STAR cast_expression
+		| multiplicative_expression SLASH cast_expression
+		|multiplicative_expression PRECENT cast_expression
+
+		;
+cast_expression
+		: unary_expression
+		| LP type_name RP cast_expression
+		;
+unary_expression
+		: postfix_expression
+		| PLUSPLUS unary_expression
+		| MINUSMINUS unary_expression
+		| AMP cast_expression
+		| STAR cast_expression
+		| EXCL cast_expression
+		| MINUS cast_expression
+		| PLUS cast_expression
+		| SIZEOF_SYM unary_expression
+		| SIZEOF_SYM LP type_name RP
+		;
+postfix_expression
+		:primary_expression
+		| postfix_expression LB expression RB
+		| postfix_expression LP arg_expression_list_opt RP
+		| postfix_expression PREIOD IDENTIFIER
+		| postfix_expression ARROW IDENTIFIER
+		| postfix_expression PLUSPLUS
+		| postfix_expression MINUSMINUS
+		;
+primary_expression
+		: IDENTIFIER
+		| INTEGER_CONSTANT
+		| FLOAT_CONSTANT
+		| CHARACTER_CONSTANT
+		| STRING_LITERAL
+		| LP expression RP
+;
+type_name
+		: declaration_specifiers abstract_declarator_opt
+		;
 
 %%
-int main() {
-yyin = stdin;
-do { 
-	yyparse();
-} while(!feof(yyin));
-return 0;
-}
+extern char * yytext;
+
 void yyerror(const char* s) {
-fprintf(stderr, "Parse error: %s\n", s);
-exit(1);
+	syntax_err ++;
+	printf("Line %d: %s near %s\n", line_no,s,yytext);
 }

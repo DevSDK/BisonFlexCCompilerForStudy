@@ -76,7 +76,7 @@
     <ExecutablePath>E:\VisualStudio\win_flex_bison\;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExecutablePath>E:\VisualStudio\win_flex_bison\;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>D:\VisualStudio15\win_flex_bison;E:\VisualStudio\win_flex_bison\;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExecutablePath>E:\VisualStudio\win_flex_bison\;$(ExecutablePath)</ExecutablePath>
