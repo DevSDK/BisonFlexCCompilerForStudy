@@ -1,4 +1,4 @@
-#pragma once
+#pragma once  //DDAKO_SOFTWARE_EDU_FUTURE_KOREA
 
 #include "c_compiler.tab.h"
 
