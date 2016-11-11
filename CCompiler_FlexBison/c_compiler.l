@@ -11,7 +11,7 @@ ws {delim}+
 #include "c_compiler.tab.h"
 #include "Types.h"
 #include <stdio.h>
-int line_no, syntax_err;
+extern int line_no, syntax_err;
 A_ID * current_id;
 extern YYSTYPE yyval;
 char * makeString(char *);

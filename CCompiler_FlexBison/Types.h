@@ -85,6 +85,7 @@ typedef struct s_type {
 	int size;
 	int local_var_size;
 	struct s_type * element_type;
+	struct s_id * field;
 	struct s_node * expr;
 	int line;
 	BOOLEAN check;
