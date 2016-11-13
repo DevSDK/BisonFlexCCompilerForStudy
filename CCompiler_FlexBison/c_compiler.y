@@ -7,6 +7,7 @@ extern int yylex();
 extern int yyparse();
 extern int line_no, syntax_err;
 extern FILE* yyin;
+
 void yyerror(const char* s);
 %}
 
