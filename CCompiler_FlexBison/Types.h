@@ -88,8 +88,8 @@ typedef struct s_type {
 	struct s_id * field;
 	struct s_node * expr;
 	int line;
-	BOOLEAN check;
-	BOOLEAN prt;
+	bool check;
+	bool prt;
 }A_TYPE;
 typedef struct s_id {
 	char * name;

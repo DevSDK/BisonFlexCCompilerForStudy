@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Types.h"
-
+#include "SupportingFunctions.h"
 extern int yylex();
 extern int yyparse();
 extern int line_no, syntax_err;
@@ -67,7 +67,7 @@ declaration_list_opt
 declaration_list
 		:
 		declaration {$$=$1;}
-		| declaration_list declaration($$ = linkDeclaratorList($2,$1);)
+		| declaration_list declaration { $$ = linkDeclaratorList($1,$2);}
 		;
 declaration
 		: declaration_specifiers init_declaration_list_opt SEMICOLON
@@ -94,7 +94,7 @@ init_declarator
 		| declarator ASSIGN initializer {$$=setDeclaratorInit($1, $2);}
 		;
 initializer
-		constant_expression {$$ = makeNode(C-inIT_LIST_ONE,NIL,$1,NIL);}
+		:constant_expression {$$ = makeNode(C-inIT_LIST_ONE,NIL,$1,NIL);}
 		| LR initializer RR	{$$=$2;}
 		;
 initializer_list
@@ -136,7 +136,7 @@ struct_declarator_list
 struct_declarator
 		: declarator
 		;
-enum_tpye specifier
+enum_tpye_specifier
 		:ENUM_SYM IDENTIFIER
 
 		LR enumerator_list RR
@@ -205,8 +205,11 @@ abstract_declarator
 		| pointer direct_abstract_declarator
 		;
 direct_abstract_declarator
-		| pointer
-		| pointer direct_abstract_declarator
+		: LP abstract_declarator RP 
+		| LB constant_expression_opt RB
+		| direct_abstract_declarator LB constant_expression_opt RB
+		| LP parameter_type_list_opt RP
+		| direct_abstract_declarator LP parameter_type_list_opt RP
 		;
 statement_list_opt
 		:
@@ -224,7 +227,7 @@ statement
 		| jump_statement
 		;
 labeled_statement
-		: CASE_SYM contant_expression COLON statement
+		: CASE_SYM constant_expression COLON statement
 		| DEFAULT_SYM COLON statement
 		;
 compound_statement
@@ -264,9 +267,9 @@ jump_statement
 		;
 arg_expression_list_opt
 		:
-		| arg_expression
+		| arg_expression_list
 		;
-arg_expression
+arg_expression_list
 		: assignment_expression
 		| arg_expression_list COMMA assignment_expression
 		;
@@ -331,7 +334,7 @@ multiplicative_expression
 		:cast_expression
 		| multiplicative_expression STAR cast_expression
 		| multiplicative_expression SLASH cast_expression
-		|multiplicative_expression PRECENT cast_expression
+		| multiplicative_expression PERCENT cast_expression
 
 		;
 cast_expression
@@ -354,7 +357,7 @@ postfix_expression
 		:primary_expression
 		| postfix_expression LB expression RB
 		| postfix_expression LP arg_expression_list_opt RP
-		| postfix_expression PREIOD IDENTIFIER
+		| postfix_expression PERIOD IDENTIFIER
 		| postfix_expression ARROW IDENTIFIER
 		| postfix_expression PLUSPLUS
 		| postfix_expression MINUSMINUS

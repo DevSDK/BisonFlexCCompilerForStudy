@@ -5,6 +5,7 @@
 #include "Types.h"
 #include "c_compiler.tab.h"
 #include <string.h>
+extern char * yytext;
 A_TYPE * int_type, *char_type, *void_type, * float_type, *string_type;
 A_NODE * root;
 A_ID * current_id = NIL;
@@ -41,7 +42,7 @@ A_TYPE * setTypeStructOrEnumIdentifier(T_KIND, char *, ID_KIND);
 bool isNotSameFormalParameters(A_ID*, A_ID*);
 bool isNotSameType(A_TYPE *, A_TYPE *);
 bool isPointerOrArrayType(A_TYPE *);
-void syntax_error();
+void syntax_error(int, char *);
 void initalize();
 A_NODE * makeNode(NODE_NAME n, A_NODE *a, A_NODE * b, A_NODE *c)
 {
@@ -175,9 +176,9 @@ void checkForwardReference()
 		}
 		t = id->type;
 		if (id->kind = ID_NULL)
-			syntax_err(31, id->name);
+			syntax_error(31, id->name);
 		else if ((id->kind == ID_STRUCT || id->kind == ID_ENUM) && t->field == NIL)
-			syntax_err(32, id->name);
+			syntax_error(32, id->name);
 		id = id->prev;
 	}
 
@@ -198,7 +199,7 @@ A_SPECIFIER * updateSpecifier(A_SPECIFIER * p, A_TYPE * t, S_KIND s)
 		if (p->type)
 		{
 			if (p->type != t)
-				syntax_err(32);
+				syntax_error(24, nullptr);
 
 		}
 		else
@@ -208,7 +209,7 @@ A_SPECIFIER * updateSpecifier(A_SPECIFIER * p, A_TYPE * t, S_KIND s)
 		if (p->stor)
 		{ 
 			if (s != p->stor)
-				syntax_err(24);
+				syntax_error(24,nullptr);
 		}
 		else
 			p->stor = s;
@@ -232,7 +233,7 @@ A_ID * getIdentifierDeclarator(char *s)
 	A_ID * id;
 	id = searchIdentifier(s, current_id);
 	if (id == NIL)
-		syntax_err(13, s);
+		syntax_error(13, s);
 	return id;
 }
 
@@ -248,7 +249,7 @@ A_TYPE * getTypeOfStructOrEnumRefIdentifier(T_KIND k, char *s, ID_KIND kk)
 			return id->type;
 		}
 		else
-			syntax_err(11, s);
+			syntax_error(11, s);
 		t = makeType(k);
 		id->kind = kk;
 		id->type = t;
@@ -287,9 +288,9 @@ A_ID * setDeclaratorListSpecifier(A_ID * id, A_SPECIFIER * p)
 A_ID * setParameterDeclaratorSpecifier(A_ID * id, A_SPECIFIER * p)
 {
 	if (searchIdentifierAtCurrentLevel(id->name, id->prev))
-		syntax_err(12, id->name);
+		syntax_error(12, id->name);
 	if (p->stor || p->type == void_type)
-		syntax_err(14);
+		syntax_error(14,id->name);
 	setDefaultSpecifier(p);
 	id = setDeclaratorElementType(id, p->type);
 	id->kind = ID_PARM;
@@ -302,7 +303,7 @@ A_ID * setStructDeclaratorListSpecifier(A_ID * id, A_TYPE * t)
 	while (a)
 	{
 		if (searchIdentifierAtCurrentLevel(a->name, a->prev))
-			syntax_err(12, a->name);
+			syntax_error(12, a->name);
 		a = setDeclaratorElementType(a, t);
 		a->kind = ID_FIELD;
 		a = a->link;
@@ -313,7 +314,7 @@ A_ID * setStructDeclaratorListSpecifier(A_ID * id, A_TYPE * t)
 A_TYPE * setTypeNameSpecifier(A_TYPE * t, A_SPECIFIER * p)
 {
 	if (p->stor)
-		syntax_err(20);
+		syntax_error(20, "");
 	setDefaultSpecifier(p);
 	t = setTypeElementType(t, p->type);
 	return t;
@@ -336,7 +337,136 @@ A_TYPE * setTypeField(A_TYPE * t, A_ID * n)
 }
 A_TYPE * setTypeExpr(A_TYPE * t, A_NODE * n)
 {
-	t->expr = n;
+	t->expr=n;
 	return t;
 }
+A_TYPE * setTypeStructOrEnumIdentifier(T_KIND k, char * s, ID_KIND kk)
+{
+	A_TYPE * t;
+	A_ID * id, *a;
+	a = searchIdentifierAtCurrentLevel(s, current_id);
+
+	if (a)
+	{
+		if (a->kind == kk && a->type->kind == k)
+		{
+			if (a->type->field)
+				syntax_error(12, s);
+			else
+				return a->type;
+		}
+		else
+			syntax_error(12, s);
+	}
+	id = makeIdentifier(s);
+	t = makeType(k);
+	id->type = t;
+	id->kind = kk;
+	return t;
+}
+
+
+A_TYPE * setTypeAndKindOfDeclarator(A_TYPE * t, ID_KIND k, A_ID * id)
+{
+	if (searchIdentifier(id->name, id->prev))
+		syntax_error(12, id->name);
+	id->kind = k;
+	id->type = t;
+	return t;
+}
+
+bool isNotSameFormalParameters(A_ID * a, A_ID * b)
+{
+	if (a == NIL)
+		return false;
+	while (a)
+	{
+		if (b == NIL || isNotSameType(a->type, b->type))
+			return false;
+		a = a->link;
+		b = b->link;
+	}
+	if (b)
+		return true;
+	else
+		return false;
+
+}
+bool isNotSameType(A_TYPE * t1, A_TYPE * t2)
+{
+	if (isPointerOrArrayType(t1) || isPointerOrArrayType(t2))
+		return isNotSameType(t1->element_type, t2->element_type);
+	else
+		return t1 != t2;
+}
+
+
+void initalize()
+{
+	int_type = setTypeAndKindOfDeclarator(makeType(T_ENUM), ID_TYPE, makeIdentifier("int"));
+	float_type = setTypeAndKindOfDeclarator(makeType(T_ENUM), ID_TYPE, makeIdentifier("float"));
+	char_type = setTypeAndKindOfDeclarator(makeType(T_ENUM), ID_TYPE, makeIdentifier("char"));
+	void_type = setTypeAndKindOfDeclarator(makeType(T_ENUM), ID_TYPE, makeIdentifier("void"));
+	string_type = setTypeElementType(makeType(T_POINTER), char_type);
+	int_type->size = 4;			int_type->check = true;
+	float_type->size = 4;		float_type->check = true;
+	char_type->size = 1;		char_type->check = true;
+	void_type->size = 0;		void_type->check = true;
+	string_type->size = 4;		string_type->check = true;
+
+	setDeclaratorTypeAndKind(makeIdentifier("printf"), setTypeField(setTypeElementType(makeType(T_FUNC), void_type),
+	linkDeclaratorList(setDeclaratorTypeAndKind(makeDummyIdentifier(), string_type, ID_PARM), 
+	setDeclaratorKind(makeDummyIdentifier(), ID_PARM))), ID_FUNC);
+
+	setDeclaratorTypeAndKind(
+		makeIdentifier("malloc"),
+		setTypeField(
+			setTypeElementType(makeType(T_FUNC), 
+			string_type), setDeclaratorTypeAndKind(makeDummyIdentifier(), int_type, ID_PARM)), ID_FUNC);
+}
+
+void syntax_error(int i, char * s)
+{
+	syntax_err++;
+	printf("line %d : syntax error : ", line_no);
+	switch (i)
+	{
+	
+	case 11: printf("illegal reference struct or union identifier %s ", s);
+		break;
+	case 12: printf("redeclaration of identifier %s ", s);
+		break;
+	case 13: printf("undefined identifier %s ", s);
+		break;
+	case 14: printf("illegal type specifier in formal parameter ");
+		break;
+	case 20: printf("illegal storage class in type specifiers ");
+		break;
+	case 21: printf("illegal function declarator ");
+		break;
+	case 22: printf("conflicting parm type in prototype function function %s ", s);
+		break;
+	case 23: printf("empty parameter name ");
+		break;
+	case 24: printf("illegal declaration specifiers ");
+		break;
+	case 25: printf("illegal function specifiers");
+		break;
+	case 26: printf("illegal or conflictting return type in function %s , s");
+		break;
+	case 31: printf("undefined type for identifier %s",s);
+		break;
+	case 32: printf("imcomplete forward reference for identifier %s",s);
+		break;
+
+	default: printf("unknown");
+		break;
+		if (strlen(yytext) == 0)
+			printf(" at end \n");
+		else
+			printf(" near %s \n",yytext);
+
+	}
+}
+
 #endif
