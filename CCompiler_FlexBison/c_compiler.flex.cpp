@@ -617,10 +617,10 @@ char *yytext_ptr;
 #include "c_compiler.tab.h"
 #include "Types.h"
 #include <stdio.h>
-int line_no, syntax_err;
- A_ID * current_id;
+extern int line_no, syntax_err;
+A_ID * current_id;
 extern YYSTYPE yyval;
-char * current_ideString(char *);
+char * makeString(char *);
 int checkIdentifier(char *);
 
 
@@ -2199,17 +2199,17 @@ int checkIdentifier(char * s)
 	}
 	if(id ==0)
 	{
-		yylval.str = makeString(s);
+		yylval = makeString(s);
 		return IDENTIFIER;
 	}
 	else if(id->kind == ID_TYPE)
 	{
-		yylval.str = id->name;
+		yylval = id->name;
 		return IDENTIFIER;
 	}
 	else
 	{
-		yylval.str = id->name;
+		yylval = id->name;
 		return IDENTIFIER;
 	}
 

@@ -8,22 +8,16 @@ extern int yyparse();
 extern int line_no, syntax_err;
 extern FILE* yyin;
 void yyerror(const char* s);
+extern A_NODE* root;
 %}
 
 %union {
 int ival;
 float fval;
 char * str;
+A_NODE * tree;
 }
 
-
-
-%token<ival> T_INT
-%token<fval> T_FLOAT
-%token T_PLUS T_MINUS T_MULTIPLY T_DIVIDE T_LEFT T_RIGHT
-%token T_NEWLINE T_QUIT
-
-%start program
 %token IDENTIFIER TYPE_IDENTIFIER FLOAT_CONSTANT INTEGER_CONSTANT
 	   CHARACTER_CONSTANT STRING_LITERAL PLUS MINUS PLUSPLUS
 	   MINUSMINUS BAR AMP BARBAR AMPAMP ARROW
@@ -32,19 +26,14 @@ char * str;
 	   COLON AUTO_SYM SIZEOF_SYM UNION_SYM
 	   STRUCT_SYM ENUM_SYM STATIC_SYM  
 	   IF_SYM ELSE_SYM WHILE_SYM DO_SYM FOR_SYM CONTINUE_SYM
-	   BREAK_SYM RETURN_SYM SWITCH_SYM CASE_SYM DEFAULT_SYM TYPEDEF_SYM
-%left T_PLUS T_MINUS
-%left T_MULTIPLY T_DIVIDE 
-
-%type<ival> expression
-%type<fval> mixed_expression
-
-
+	   BREAK_SYM RETURN_SYM SWITCH_SYM CASE_SYM DEFAULT_SYM TYPEDEF_SYM 
+	 
+%start program
+	   
 %%
-
 program
 		: translation_unit
-		{root = makeNode(N_PROGRAM, NIL, $1, NIL); checkForwaradReference();}
+		{ root = makeNode(N_PROGRAM, NIL, $1, NIL); checkForwaradReference();}
 		;
 translation_unit
 		: external_declaration {$$ = $1;}
@@ -54,7 +43,11 @@ external_unit
 		: function_definition {$$ = $1;}
 		| declaration {$$ = $1;}
 		;
-function_defination
+external_declaration
+		: function_definition 
+		| declaration
+		;
+function_definition
 		: declaration_specifiers declarator {$$ = setFunctionDeclaratorSpecifier($2,$1);}
 		compound_statement {$$=setFunctionDeclaatorBody{$3,$4};}
 		| declarator{$$=setFunctionDeclaratorSpecifier($1, makeSpecifier(int_type,0));}
@@ -70,14 +63,14 @@ declaration_list
 		| declaration_list declaration { $$ = linkDeclaratorList($1,$2);}
 		;
 declaration
-		: declaration_specifiers init_declaration_list_opt SEMICOLON
+		: declaration_specifiers init_declarator_list_opt SEMICOLON
 		{$$=setDeclaatorListSpecifier($2,$1);}
 		;
 declaration_specifiers
 		:type_specifier
 		|storage_class_specifier
 		|type_specifier declaration_specifiers{$$ = updateSpecifier ($2, 0, $1);}
-		| storageclass specifier declaration_specifiers
+		| storage_class_specifier declaration_specifiers
 		{$$=updateSpecifier($2,0,$1);}
 		;
 storage_class_specifier
@@ -89,8 +82,14 @@ init_declarator_list_opt
 		:
 		| init_declarator_list {$$=$1;}
 		;
+
+init_declarator_list
+		:
+		| init_declarator_list
+		;
+
 init_declarator
-		: init_declarator {$$=$1;}
+		: declarator {$$=$1;}
 		| declarator ASSIGN initializer {$$=setDeclaratorInit($1, $2);}
 		;
 initializer
@@ -125,63 +124,61 @@ struct_declaration_list
 		| struct_declaration_list struct_declaration {$$=linkDeclaratorList($1,$2);}
 		;
 struct_declaration
-		:type_specifier struct_declarator_list SEMICOLON
+		:type_specifier struct_declarator_list SEMICOLON 
 		{$$ = setStructDeclaratorListSpecifier($2,$1);}
 		;
 struct_declarator_list
-		:struct_declarator
-		| struct declarator_list COMMA struct_declarator
-		
+		:struct_declarator {$$ = $1;}
+		| struct_declarator_list COMMA struct_declarator  {$$=linkDeclaratorList($1, $2);}
 		;
 struct_declarator
-		: declarator
+		: declarator {$$ = $1;}
 		;
-enum_tpye_specifier
+enum_type_specifier
 		:ENUM_SYM IDENTIFIER
-
-		LR enumerator_list RR
-		| ENUM_SYM
-		LR enumerator_list RR
-		| ENUM_SYM IDENTIFIER
-		
+		{$$ = setTypeStructOrEnumIdentifier(T_ENUM, $2, ID_ENUM);}
+		LR enumerator_list RR  {$$ = setTypeField($3, $5);}
+		| ENUM_SYM {$$ = makeType(T_ENUM);}
+		LR enumerator_list RR {$$ = setTypeField($2, $4);}
+		| ENUM_SYM IDENTIFIER 
+		{$$ = getTypeOfStructOrEnumRefIdentifier(T_ENUM, $2, ID_ENUM);}
 		;
 
 enumerator_list
-		: enumerator
-		| enumerator_list COMMA enumerator
+		: enumerator {$$ = $1;}
+		| enumerator_list COMMA enumerator {$$= linkDeclaratorList($1, $3); }
 		;
 enumerator
 		: IDENTIFIER
-		
+		{$$ = setDeclaratorKind(makeIdentifier($1), ID_ENUM_LITERAL);}
 		| IDENTIFIER
-
-		ASSIGN experession
+		{$$ = setDeclaratorKind(makeIdentifier($1),ID_ENUM_LITERAL);}
+		ASSIGN expression {$$ = setDeclaratorInit($2, $4);}
 		;
 declarator
-		: pointer direct_declarator
-		| direct_declarator
+		: pointer direct_declarator { $$ = setTypeElementType($2 $1); }
+		| direct_declarator { $$ = $1; }
 		;
 pointer
-		: STAR
-		| STAR pointer
+		: STAR {$$ = makeType(T_POINTER);}
+		| STAR pointer {$$ = setTypeElementType($2, makeType(T_POINTER));}
 		;
 direct_declarator
-		: IDENTIFIER
-		| LP declarator RP
+		: IDENTIFIER  {$$ = makeIdentifier($1);}
+		| LP declarator RP {$$ = $2; }
 		| direct_declarator LB constant_expression_opt RB
-
-		| direct_declarator LP
-		parameter_type_list_opt RP
-
+		{$$ = setDeclaratorElementType($1, setTypeExpr(makeType(T_ARRAY), $3));}
+		| direct_declarator LP { $$ = current_id; current_level++; }
+		parameter_type_list_opt RP 
+		{ $$ = setDeclaratorElementType($1, setTypeField(makeType(T_FUCN), $4));}
 		;
-parameter_type_list_opt
-		:
-		| parameter_type_list
+parameter_type_list_opt 
+		: {$$ = NIL;}
+		| parameter_type_list { $$ = $1;}
 		;
 parameter_type_list
-		:parameter_list
-		| parameter_list COMMA DOTDOTDOT
-		
+		:parameter_list {$$ = $1;}
+		| parameter_list COMMA DOTDOTDOT {$$ = linkDeclaratorList($1, setDeclaratorKind(makeDummyIdentifier(),ID_PARM));}
 		;
 parameter_list
 		: parameter_declaration
@@ -221,7 +218,7 @@ statement_list
 		;
 statement
 		: labeled_statement
-		| expression_statemnt
+		| expression_statement
 		| selection_statement
 		| iteration_statemnt
 		| jump_statement
@@ -293,7 +290,7 @@ conditional_expression
 		: logical_or_expression
 		;
 logical_or_expression
-		: local_and_expression
+		: logical_and_expression
 		| logical_or_expression BARBAR logical_and_expression
 
 		;
@@ -320,7 +317,7 @@ relational_expression
 		| relational_expression LSS shift_expression
 		| relational_expression GTR shift_expression
 		| relational_expression LEQ shift_expression
-		| relational_expression_GEQ shift_expression
+		| relational_expression GEQ shift_expression
 		;
 shift_expression
 		: additive_expression

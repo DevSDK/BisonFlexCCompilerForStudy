@@ -37,7 +37,7 @@ A_TYPE * setTypeNameSpecifier(A_TYPE *, A_SPECIFIER *);
 A_TYPE * setTypeElementType(A_TYPE *, A_TYPE *);
 A_TYPE * setTypeField(A_TYPE *, A_ID *);
 A_TYPE * setTypeExpr(A_TYPE *, A_NODE*);
-A_TYPE * setTypeAndKindOfDeclarator(A_TYPE *, ID_KIND, A_ID *);
+A_TYPE * setTypeAndKindOfDeclarator(A_TYPE *, ID_KIND, A_ID *);	
 A_TYPE * setTypeStructOrEnumIdentifier(T_KIND, char *, ID_KIND);
 bool isNotSameFormalParameters(A_ID*, A_ID*);
 bool isNotSameType(A_TYPE *, A_TYPE *);
@@ -228,7 +228,7 @@ A_ID* linkDeclaratorList(A_ID * id1, A_ID * id2)
 	return id1;
 } 
 
-A_ID * getIdentifierDeclarator(char *s)
+A_ID * getIdentifierDeclared(char *s)
 {
 	A_ID * id;
 	id = searchIdentifier(s, current_id);
