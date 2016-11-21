@@ -370,19 +370,19 @@ postfix_expression
 		| postfix_expression LP arg_expression_list_opt RP {$$ = makeNode(N_EXP_FUNCTION_CALL, $1, NIL, $3);}
 		| postfix_expression PERIOD IDENTIFIER {$$= makeNode(N_EXP_STRUCT, $1, NIL, $3);}
 		| postfix_expression ARROW IDENTIFIER {$$ = makeNode(N_EXP_ARROW, $1, NIL, $3);}
-		| postfix_expression PLUSPLUS 
-		| postfix_expression MINUSMINUS
+		| postfix_expression PLUSPLUS { $$ = makeNode(N_EXP_POST_INC, NIL, $1, NIL); } 
+		| postfix_expression MINUSMINUS { $$ = makeNode(N_EXP_POST_DEC, NIL, $1, NIL);}
 		;
 primary_expression
-		: IDENTIFIER
-		| INTEGER_CONSTANT
-		| FLOAT_CONSTANT
-		| CHARACTER_CONSTANT
-		| STRING_LITERAL
-		| LP expression RP
+		: IDENTIFIER { $$ = makeNode(N_EXP_IDENT, NIL, getIdentifier($1),NIL); }
+		| INTEGER_CONSTANT { $$ = makeNode(N_EXP_INT_CONST, NIL, $1, NIL); }
+		| FLOAT_CONSTANT { $$ = makeNode(N_EXP_FLOAT_CONST, NIL ,$1, NIL); }
+		| CHARACTER_CONSTANT { $$ = makeNode(N_EXP_CHAR_CONST, NIL, $1, NIL);}
+		| STRING_LITERAL { $$ = makeNode(N_EXP_STRING_LITERAL, NIL, $1, NIL); }
+		| LP expression RP { $$ = $2; }
 ;
 type_name
-		: declaration_specifiers abstract_declarator_opt
+		: declaration_specifiers abstract_declarator_opt { $$ = setTypeNameSpecifier($2, $1); }
 		;
 
 %%
