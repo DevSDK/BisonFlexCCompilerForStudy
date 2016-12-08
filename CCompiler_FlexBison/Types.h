@@ -71,27 +71,27 @@ typedef enum {Q_NULL, Q_CONST, Q_VOLATILE}Q_KIND;
 typedef enum {S_NULL, S_AUTO, S_STATIC, S_TYPEDEF, S_EXTERN, S_REGISTER}S_KIND;
 typedef enum {ID_NULL, ID_VAR, ID_FUNC, ID_PARM, ID_FIELD, ID_TYPE, ID_ENUM, ID_STRUCT, ID_ENUM_LITERAL} ID_KIND;
 
-typedef struct s_node {
+struct A_NODE {
 	NODE_NAME name;
 	int line;
 	int value;
-	struct s_type * type;
-	struct s_node * llink;
-	struct s_node * clink;
-	struct s_node * rlink;	
-}A_NODE;
-typedef struct s_type {
+	struct A_NODE * type;
+	struct A_NODE * llink;
+	struct A_NODE * clink;
+	struct A_NODE * rlink;
+};
+ struct A_TYPE {
 	T_KIND kind;
 	int size;
 	int local_var_size;
-	struct s_type * element_type;
-	struct s_id * field;
-	struct s_node * expr;
+	struct A_TYPE * element_type;
+	struct A_ID * field;
+	struct A_NODE * expr;
 	int line;
 	bool check;
 	bool prt;
-}A_TYPE;
-typedef struct s_id {
+};
+struct A_ID {
 	char * name;
 	ID_KIND kind;
 	S_KIND specifier;
@@ -101,13 +101,13 @@ typedef struct s_id {
 	A_NODE * init;
 	A_TYPE * type;
 	int line;
-	struct s_id * prev;
-	struct s_id * link;
-}A_ID;
+	struct A_ID * prev;
+	struct A_ID * link;
+};
 typedef union { int i; float f; char c; char* s; }LIT_VALUE;
 typedef struct lit { int addr; A_TYPE * type; LIT_VALUE value;} A_LITERAL;
-typedef struct {
+ struct A_SPECIFIER {
 	A_TYPE * type;
 	S_KIND stor;
 	int line; 
-} A_SPECIFIER;
+} ;

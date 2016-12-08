@@ -15,8 +15,13 @@ extern A_NODE* root;
 int ival;
 float fval;
 char * str;
-A_NODE * tree;
+int s_kind;
+A_NODE * a_node;
+A_TYPE * a_type
+A_SPECIFIER * a_specifier;
+A_ID * a_id;
 }
+
 
 %token IDENTIFIER TYPE_IDENTIFIER FLOAT_CONSTANT INTEGER_CONSTANT
 	   CHARACTER_CONSTANT STRING_LITERAL PLUS MINUS PLUSPLUS
@@ -27,7 +32,13 @@ A_NODE * tree;
 	   STRUCT_SYM ENUM_SYM STATIC_SYM  
 	   IF_SYM ELSE_SYM WHILE_SYM DO_SYM FOR_SYM CONTINUE_SYM
 	   BREAK_SYM RETURN_SYM SWITCH_SYM CASE_SYM DEFAULT_SYM TYPEDEF_SYM 
-	 
+
+
+%type<a_node> translation_unit program primary_expression expression postfix_expression
+%type<a_id> external_declaration function_definition declaration_list external_unit compound_statement declaration
+			direct_declarator declaration_list_opt init_declarator_list_opt 
+%type<a_specifier> declaration_specifiers
+%type<a_type> declarator type_name 
 %start program
 	   
 %%
@@ -44,15 +55,16 @@ external_unit
 		| declaration {$$ = $1;}
 		;
 external_declaration
-		: function_definition 
-		| declaration
+		: function_definition  {$$= $1;}
+		| declaration {$$ = $1;}
 		;
 function_definition
-		: declaration_specifiers declarator {$$ = setFunctionDeclaratorSpecifier($2,$1);}
-		compound_statement {$$=setFunctionDeclaatorBody{$3,$4};}
-		| declarator{$$=setFunctionDeclaratorSpecifier($1, makeSpecifier(int_type,0));}
-		compound_statement {$$= setFunctionDeclaratorBody($2,$3);}
+		: declaration_specifiers declarator { $<a_id>$ = setFunctionDeclaratorSpecifier($2,$1);}
+		compound_statement  {$$=setFunctionDeclaratorBody{$<a_id>3,$4};}
+		| declarator {$<a_id>$=setFunctionDeclaratorSpecifier($1, makeSpecifier(int_type,0));}
+		compound_statement {$$= setFunctionDeclaratorBody($<a_id>2,$3);}
 		;
+
 declaration_list_opt
 		:					{$$ = NIL;}
 		| declaration_list	{$$ = $1;}
@@ -64,28 +76,27 @@ declaration_list
 		;
 declaration
 		: declaration_specifiers init_declarator_list_opt SEMICOLON
-		{$$=setDeclaatorListSpecifier($2,$1);}
+		{$$=setStructDeclaratorListSpecifier($2,$1);}
 		;
 declaration_specifiers
-		:type_specifier
-		|storage_class_specifier
-		|type_specifier declaration_specifiers{$$ = updateSpecifier ($2, 0, $1);}
-		| storage_class_specifier declaration_specifiers
-		{$$=updateSpecifier($2,0,$1);}
+		:type_specifier			{$<a_specifier>$=makeSpecifier($<a_type>1,0);}
+		|storage_class_specifier {$<a_specifier>$=makeSpecifier(0,$<s_kind>1);}
+		|type_specifier declaration_specifiers{$<a_specifier>$ = updateSpecifier ($2, $<a_type>1, 0);}
+		| storage_class_specifier declaration_specifiers {$<a_specifier>$=updateSpecifier($2,0,$<s_kind>1);}
 		;
 storage_class_specifier
-		: AUTO_SYM	{$$=S_AUTO;}
-		| STATIC_SYM	{$$=S_STATIC;}
-		| TYPEDEF_SYM	{$$=S_;}
+		: AUTO_SYM	{$<s_kind>$=S_AUTO;}
+		| STATIC_SYM	{$<s_kind>$=S_STATIC;}
+		| TYPEDEF_SYM	{$<s_kind>$=S_TYPEDEF;}
 		;			
 init_declarator_list_opt
-		:
-		| init_declarator_list {$$=$1;}
+		:					   {$<a_id>$=makeDummyIdentifier();}
+		| init_declarator_list {$$=$<a_id>1;}
 		;
 
 init_declarator_list
-		:
-		| init_declarator_list
+		:init_declarator	{$<a_id>$=$<a_id>1;}
+		| init_declarator_list COMMA init_declarator {$<a_id>$=linkDeclaratorList($<a_id>1, $<a_id>3);}
 		;
 
 init_declarator
@@ -108,8 +119,8 @@ type_specifier
 struct_type_specifier
 		: struct_or_union IDENTIFIER
 		{$$=setTypeStructOrEnumIdentifier($1, $2, ID_STRUCT);}
-		LR {$$= current_id; current_level++;} struct_declaration_list RR
-		{checkForwardReference();$$ = setTypeField($3, $6); current_level--; current_id = $5;}
+		LR {$<a_id>$= current_id; current_level++;} struct_declaration_list RR
+		{checkForwardReference();$<a_type>$ = setTypeField($3, $6); current_level--; current_id = $5;}
 		| struct_or_union {$$ = makeType($1);} LR {$$ = current_id; current_level++;} 
 		struct_declaration_list RR {checkForwardReference();$$ = setTypeField($2, $2); current_level--; current_id = $4;}
 		| struct_or_union IDENTIFIER
@@ -187,9 +198,9 @@ parameter_list
 		;
 parameter_declaration
 		: declaration_specifiers declarator
-		{$$ = setParameterDeclaratorSpecifier($2, $1);}
+		{$<a_id>$ = setParameterDeclaratorSpecifier($2, $1);}
 		| declaration_specifiers abstract_declarator_opt
-		{$$ = setParameterDeclaratorSpecifier(setDeclaratorType(makeDummyIdentifier(), $2), $1);}
+		{$<a_id>$ = setParameterDeclaratorSpecifier(setDeclaratorType(makeDummyIdentifier(), $2), $1);}
 		;
 abstract_declarator_opt
 		: {$$ = NIL;}
@@ -233,7 +244,10 @@ labeled_statement
 		;
 compound_statement
 		: LR {$$ = current_id; current_level++;} declaration_list_opt
-		  statement_list_opt RR { checkForwardReference(); }
+		  statement_list_opt RR { checkForwardReference(); 
+		  $$ = makeNode(N_STMT_COMPOUND, $3, NIL, $4); current_id = $2;
+		  current_level--;
+		  }
 		;
 expression_statement
 		: SEMICOLON {$$ = makeNode(N_STMT_EMPTY, NIL, NIL, NIL);}
@@ -366,23 +380,23 @@ unary_expression
 		;
 postfix_expression
 		:primary_expression {$$ =  $1;}
-		| postfix_expression LB expression RB { $$ = makeNode(N_EXP_ARRAY, $1, NIL, $3); } 
-		| postfix_expression LP arg_expression_list_opt RP {$$ = makeNode(N_EXP_FUNCTION_CALL, $1, NIL, $3);}
-		| postfix_expression PERIOD IDENTIFIER {$$= makeNode(N_EXP_STRUCT, $1, NIL, $3);}
-		| postfix_expression ARROW IDENTIFIER {$$ = makeNode(N_EXP_ARROW, $1, NIL, $3);}
-		| postfix_expression PLUSPLUS { $$ = makeNode(N_EXP_POST_INC, NIL, $1, NIL); } 
-		| postfix_expression MINUSMINUS { $$ = makeNode(N_EXP_POST_DEC, NIL, $1, NIL);}
+		| postfix_expression LB expression RB { $$ = makeNode(N_EXP_ARRAY, $<a_node>1, NIL, $<a_node>3); } 
+		| postfix_expression LP arg_expression_list_opt RP {$$ = makeNode(N_EXP_FUNCTION_CALL, $<a_node>1, NIL, $<a_node>3);}
+		| postfix_expression PERIOD IDENTIFIER {$$= makeNode(N_EXP_STRUCT, $<a_node>1, NIL, $<a_node>3);}
+		| postfix_expression ARROW IDENTIFIER {$$ = makeNode(N_EXP_ARROW, $<a_node>1, NIL, $<a_node>3);}
+		| postfix_expression PLUSPLUS { $$ = makeNode(N_EXP_POST_INC, NIL, $<a_node>1, NIL); } 
+		| postfix_expression MINUSMINUS { $$ = makeNode(N_EXP_POST_DEC, NIL, $<a_node>1, NIL);}
 		;
 primary_expression
-		: IDENTIFIER { $$ = makeNode(N_EXP_IDENT, NIL, getIdentifier($1),NIL); }
-		| INTEGER_CONSTANT { $$ = makeNode(N_EXP_INT_CONST, NIL, $1, NIL); }
-		| FLOAT_CONSTANT { $$ = makeNode(N_EXP_FLOAT_CONST, NIL ,$1, NIL); }
-		| CHARACTER_CONSTANT { $$ = makeNode(N_EXP_CHAR_CONST, NIL, $1, NIL);}
-		| STRING_LITERAL { $$ = makeNode(N_EXP_STRING_LITERAL, NIL, $1, NIL); }
-		| LP expression RP { $$ = $2; }
+		: IDENTIFIER { $$ = makeNode(N_EXP_IDENT, NIL, getIdentifier($<str>1),NIL); }
+		| INTEGER_CONSTANT { $$ = makeNode(N_EXP_INT_CONST, NIL, $<a_node>1, NIL); }
+		| FLOAT_CONSTANT { $$ = makeNode(N_EXP_FLOAT_CONST, NIL ,$<a_node>1, NIL); }
+		| CHARACTER_CONSTANT { $$ = makeNode(N_EXP_CHAR_CONST, NIL, $<a_node>1, NIL);}
+		| STRING_LITERAL { $$ = makeNode(N_EXP_STRING_LITERAL, NIL, $<a_node>1, NIL); }
+		| LP expression RP { $$ = $<a_node>2; }
 ;
 type_name
-		: declaration_specifiers abstract_declarator_opt { $$ = setTypeNameSpecifier($2, $1); }
+		: declaration_specifiers abstract_declarator_opt { $$ = setTypeNameSpecifier($<a_type>2, $1); }
 		;
 
 %%

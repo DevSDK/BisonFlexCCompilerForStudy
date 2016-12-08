@@ -17,7 +17,7 @@ A_NODE	* makeNodeList(NODE_NAME, A_NODE *, A_NODE*);
 A_ID	* makeIdentifier(char *);
 A_ID    * makeDummyIdentifier();
 A_TYPE  * makeType(T_KIND);
-A_SPECIFIER * makeSpecifer(A_TYPE*, S_KIND);
+A_SPECIFIER * makeSpecifier(A_TYPE*, S_KIND);
 void checkForwardReference();
 void setDefaultSpecifier(A_SPECIFIER*);
 A_ID	* linkDeclaratorList(A_ID *, A_ID *);
@@ -29,7 +29,7 @@ A_ID	* setDeclaratorType(A_ID*, A_TYPE *);
 A_ID	* setDeclaratorElementType(A_ID *, A_TYPE *);
 A_ID	* setDeclaratorTypeAndKind(A_ID *, A_TYPE *, ID_KIND);
 A_ID	* setDeclaratorListSpecifier(A_ID *, A_SPECIFIER*);
-A_ID	* setFunctionDeclaratorSpeficier(A_ID *, A_SPECIFIER *);
+A_ID	* setFunctionDeclaratorSpecifier(A_ID *, A_SPECIFIER *);
 A_ID	* setFunctionDeclaratorBody(A_ID *, A_NODE *);
 A_ID	* setParameterDeclaratorSpecifier(A_ID*, A_TYPE *);
 A_ID	* setStructDeclaratorListSpecifier(A_ID*, A_TYPE *);
@@ -131,7 +131,7 @@ A_TYPE * makeType(T_KIND k)
 	
 }
 
-A_SPECIFIER * makeSpecifer(A_TYPE * t, S_KIND s)
+A_SPECIFIER * makeSpecifier(A_TYPE * t, S_KIND s)
 {
 	A_SPECIFIER *p;
 	p = (A_SPECIFIER *)malloc(sizeof(A_SPECIFIER));
@@ -284,7 +284,46 @@ A_ID * setDeclaratorListSpecifier(A_ID * id, A_SPECIFIER * p)
 	}
 	return id;
 }
-
+A_ID	* setFunctionDeclaratorSpecifier(A_ID *id , A_SPECIFIER *p)
+{
+	A_ID * a;
+	if (p->stor)
+		syntax_error(25, nullptr);
+	setDefaultSpecifier(p);
+	if (id->type->kind != T_FUNC)
+	{
+		syntax_error(21, nullptr);
+		return id;
+	}
+	else
+	{
+		id = setDeclaratorElementType(id, p->type);
+		id->kind = ID_FUNC;
+	}
+	a = searchIdentifierAtCurrentLevel(id->name, id->prev);
+	if (a)
+	{
+		if (a->kind != ID_FUNC || a->type->expr)
+			syntax_error(12, id->name);
+		else
+		{
+			if (isNotSameFormalParameters(a->type->field, id->type->field))
+				syntax_error(22, id->name);
+			if (isNotSameType(a->type->element_type , id->type->element_type))
+				syntax_error(26, a->name);
+			a = id->type->field;
+			while (a)
+			{
+				if (strlen(a->name))
+					current_id = a;
+				else if (a->type)
+					syntax_error(23, nullptr);
+				a = a->link;
+			}
+				return id;
+		}
+	}
+}
 A_ID * setParameterDeclaratorSpecifier(A_ID * id, A_SPECIFIER * p)
 {
 	if (searchIdentifierAtCurrentLevel(id->name, id->prev))

@@ -11,9 +11,10 @@ private:
 	int StackArea[STACKSIZE];
 	int PC = 0;
 public:
-	void ProcessInstruction(int *, int *, int);
-protected:
+	void Update();
 	enum  InstructionEnum;
+protected:
+	void ProcessInstruction(int *, int *, int);
 	struct Instruction;
 
 };

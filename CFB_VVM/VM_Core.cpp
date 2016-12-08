@@ -5,7 +5,10 @@ void VM_Core::ProcessInstruction(int * code, int * stack, int pc)
 {
 
 }
+void VM_Core::Update()
+{
 
+}
 struct VM_Core::Instruction
 {
 	InstructionEnum instruction;
