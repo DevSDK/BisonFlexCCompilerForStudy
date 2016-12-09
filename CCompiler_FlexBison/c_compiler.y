@@ -34,7 +34,7 @@ A_ID * a_id;
 	   BREAK_SYM RETURN_SYM SWITCH_SYM CASE_SYM DEFAULT_SYM TYPEDEF_SYM 
 
 
-%type<a_node> translation_unit program primary_expression expression postfix_expression
+%type<a_node> translation_unit program primary_expression expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relationa_expression 
 %type<a_id> external_declaration function_definition declaration_list external_unit compound_statement declaration
 			direct_declarator declaration_list_opt init_declarator_list_opt 
 %type<a_specifier> declaration_specifiers
@@ -368,15 +368,15 @@ cast_expression
 		;
 unary_expression
 		: postfix_expression {$$ = $1;}
-		| PLUSPLUS unary_expression {$$ = makeNode(N_EXP_PRE_INC,NIL, $2, NIL);}
-		| MINUSMINUS unary_expression {$$ = makeNode(N_EXP_PRE_DEC,NIL, $2, NIL);}
-		| AMP cast_expression {$$ = makeNode(N_EXP_AMP,NIL, $2, NIL);}
-		| STAR cast_expression {$$ = makeNode(N_EXP_STAR, NIL, $2, NIL);}
-		| EXCL cast_expression {$$ = makeNode(N_EXP_NOT,NIL, $2, NIL);}
-		| MINUS cast_expression {$$ = makeNode(N_EXP_MINUS,NIL, $2, NIL);}
-		| PLUS cast_expression {$$ = makeNode(N_EXP_PLUS,NIL, $2, NIL);}
-		| SIZEOF_SYM unary_expression {$$ = makeNode(N_EXP_SIZE_EXP,NIL, $2, NIL);}
-		| SIZEOF_SYM LP type_name RP {$$ = makeNode(N_EXP_SIZE_TYPE,NIL, $2, NIL);}
+		| PLUSPLUS unary_expression {$$ = makeNode(N_EXP_PRE_INC,NIL, $<s_node>2, NIL);}
+		| MINUSMINUS unary_expression {$$ = makeNode(N_EXP_PRE_DEC,NIL, $<s_node>2, NIL);}
+		| AMP cast_expression {$$ = makeNode(N_EXP_AMP,NIL, $<s_node>2, NIL);}
+		| STAR cast_expression {$$ = makeNode(N_EXP_STAR, NIL, $<s_node>2, NIL);}
+		| EXCL cast_expression {$$ = makeNode(N_EXP_NOT,NIL, $<s_node>2, NIL);}
+		| MINUS cast_expression {$$ = makeNode(N_EXP_MINUS,NIL, $<s_noe>2, NIL);}
+		| PLUS cast_expression {$$ = makeNode(N_EXP_PLUS,NIL, $<s_node>2, NIL);}
+		| SIZEOF_SYM unary_expression {$$ = makeNode(N_EXP_SIZE_EXP,NIL, $<s_node>2, NIL);}
+		| SIZEOF_SYM LP type_name RP {$$ = makeNode(N_EXP_SIZE_TYPE,NIL, $<s_node>2, NIL);}
 		;
 postfix_expression
 		:primary_expression {$$ =  $1;}
