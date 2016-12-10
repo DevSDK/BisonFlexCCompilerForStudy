@@ -34,7 +34,8 @@ A_ID * a_id;
 	   BREAK_SYM RETURN_SYM SWITCH_SYM CASE_SYM DEFAULT_SYM TYPEDEF_SYM 
 
 
-%type<a_node> translation_unit program primary_expression expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relationa_expression 
+%type<a_node> translation_unit program primary_expression expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression
+	      equality_expression 
 %type<a_id> external_declaration function_definition declaration_list external_unit compound_statement declaration
 			direct_declarator declaration_list_opt init_declarator_list_opt 
 %type<a_specifier> declaration_specifiers
