@@ -35,9 +35,11 @@ A_ID * a_id;
 
 
 %type<a_node> translation_unit program primary_expression expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression
-	      equality_expression 
+	      equality_expression bitwise_or_expression bitwise_and_expression logical_or_expression logical_and_expression assignment_expression 
+		constant_expression bitwise_xor_expression conditional_expression comma_expression  arg_expression_list_opt  constant_expression_opt arg_expression_list 
+		jump_statement expression_opt iteration_statemnt for_expression statement selection_statement expression_statement statement_list_opt labeled_statement 
 %type<a_id> external_declaration function_definition declaration_list external_unit compound_statement declaration
-			direct_declarator declaration_list_opt init_declarator_list_opt 
+			direct_declarator declaration_list_opt init_declarator_list_opt statement_list
 %type<a_specifier> declaration_specifiers
 %type<a_type> declarator type_name 
 %start program
@@ -244,9 +246,9 @@ labeled_statement
 		| DEFAULT_SYM COLON statement {$$ = makeNode(N_STMT_LABEL_DEFAULT, NIL, $3, NIL);}
 		;
 compound_statement
-		: LR {$$ = current_id; current_level++;} declaration_list_opt
+		: LR {$<ival>$ = current_id; current_level++;} declaration_list_opt
 		  statement_list_opt RR { checkForwardReference(); 
-		  $$ = makeNode(N_STMT_COMPOUND, $3, NIL, $4); current_id = $2;
+		  $$ = makeNode(N_STMT_COMPOUND, $3, NIL, $4); current_id = $<ival>2;
 		  current_level--;
 		  }
 		;
@@ -289,15 +291,15 @@ jump_statement
 		;
 arg_expression_list_opt
 		:	{$$ = makeNode(A_ARG_LIST, NIL, NIL, NIL);}
-		| arg_expression_list  {$$ = $1;}
+		| arg_expression_list  {$<a_node>$ = $1;}
 		;
 arg_expression_list
 		: assignment_expression {$$ = makeNode(N_ARG_LIST, $1, NIL, makeNode(N_ARG_LIST, NIL, NIL, NIL));}
 		| arg_expression_list COMMA assignment_expression { $$ = makeNodeList(N_ARG_LIST, $1, $3 ); }
 		;
 constant_expression_opt
-		: {$$ = NIL;}
-		constant_expression {$$ = $1;}
+		: {$<a_node>$ = NIL;}
+		constant_expression {$$ = $<a_node>1;}
 		;
 constant_expression
 		: expression {$$ = $1;}
